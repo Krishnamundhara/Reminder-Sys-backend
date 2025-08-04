@@ -4,6 +4,8 @@ const session = require('express-session');
 const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const pg = require('pg');
+const connectPgSimple = require('connect-pg-simple');
 const { initializeDatabase } = require('./utils/dbInit');
 
 // Load environment variables
@@ -30,25 +32,27 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Set up session middleware with more persistent configuration
+// Set up PostgreSQL session store
+const pgSession = connectPgSimple(session);
+
+// Set up session middleware with PostgreSQL store
 app.use(session({
+  store: new pgSession({
+    conObject: {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    },
+    createTableIfMissing: true
+  }),
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
   proxy: true,
   cookie: {
-    secure: true, // Required for cross-site cookies
-    sameSite: 'none',  // Required for cross-site cookies
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    httpOnly: true
-  },
-  rolling: true,
-  cookie: { 
-    secure: false, // Set to false in both dev and prod since we might not have HTTPS
-    sameSite: 'lax', // Use lax to allow cross-site requests
+    secure: true,
+    sameSite: 'none',
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined // Only set domain in production
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
