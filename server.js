@@ -58,6 +58,13 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // true in production
+    sameSite: 'none',  // required for cross-site cookies
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,
+    domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+  },
   rolling: true,
   cookie: { 
     secure: false, // Set to false in both dev and prod since we might not have HTTPS
