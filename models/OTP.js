@@ -1,7 +1,4 @@
-const { Pool } = require('pg');
-const { dbConfig } = require('../config/db');
-
-const pool = new Pool(dbConfig);
+const { pool } = require('../config/db');
 
 class OTP {
   static async createTable() {
