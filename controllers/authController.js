@@ -1,6 +1,48 @@
 const User = require('../models/User');
 const { generateOTP, saveOTP, verifyOTP, sendOTPEmail } = require('../utils/otpUtils');
 
+// Restore user session
+const restoreSession = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Set up the session
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      is_approved: user.is_approved
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: 'Session restored successfully'
+    });
+  } catch (error) {
+    console.error('Error restoring session:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to restore session'
+    });
+  }
+};
+
 // Check authentication status
 const getAuthStatus = async (req, res) => {
   if (req.session.user) {

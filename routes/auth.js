@@ -9,7 +9,8 @@ const {
   checkEmailExists,
   checkPhoneExists,
   sendOtp,
-  verifyEmailOtp
+  verifyEmailOtp,
+  restoreSession
 } = require('../controllers/authController');
 const { isAuthenticated } = require('../utils/authMiddleware');
 
@@ -25,5 +26,8 @@ router.post('/check-email', checkEmailExists);
 router.post('/check-phone', checkPhoneExists);
 router.post('/send-otp', sendOtp);
 router.post('/verify-otp', verifyEmailOtp);
+
+// Session management
+router.post('/restore-session', restoreSession);
 
 module.exports = router;
