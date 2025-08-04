@@ -37,7 +37,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const pgSession = connectPgSimple(session);
 
 // Set up session middleware with PostgreSQL store
-app.set('trust proxy', 1); // trust first proxy
+app.enable('trust proxy'); // trust proxy for secure cookies behind Render's proxy
 
 app.use(session({
   store: new pgSession({
@@ -57,8 +57,7 @@ app.use(session({
     secure: true,
     sameSite: 'none',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain: '.onrender.com'
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
