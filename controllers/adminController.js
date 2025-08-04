@@ -39,6 +39,48 @@ const getPendingUsers = async (req, res) => {
 };
 
 // Approve a user
+const updateUserRole = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { role } = req.body;
+
+    // Check if the role is provided
+    if (!role) {
+      return res.status(400).json({
+        success: false,
+        message: 'Role is required'
+      });
+    }
+
+    // Update user role
+    const user = await User.updateRole(userId, role);
+    
+    return res.status(200).json({
+      success: true,
+      message: `User role updated to ${role}`,
+      user: user
+    });
+  } catch (error) {
+    console.error('Update user role error:', error);
+    if (error.message === 'Invalid role specified') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role specified. Allowed roles are: user, admin'
+      });
+    }
+    if (error.message === 'User not found') {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: 'Error updating user role'
+    });
+  }
+};
+
 const approveUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -230,5 +272,6 @@ module.exports = {
   deactivateUser,
   reactivateUser,
   deleteUser,
-  getUserDetails
+  getUserDetails,
+  updateUserRole
 };

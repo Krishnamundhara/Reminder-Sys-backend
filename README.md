@@ -1,15 +1,17 @@
-# User Authentication API Backend
+# Reminder System API Backend
 
-This is the backend API for a user authentication system with admin approval workflow.
+This is the backend API for the Reminder System with user authentication, admin approval workflow, and reminder management features.
 
 ## Features
 
-- User registration (signup)
-- User login/logout
-- Admin dashboard
-- User approval by admin
-- User profile management
-- Role-based access control
+- User registration with email verification (OTP)
+- Secure user authentication (login/logout)
+- Admin user management and approval workflow
+- User profile management with data validation
+- Role-based access control (user/admin)
+- Database migrations system
+- Email notifications via SMTP
+- Persistent session management
 
 ## Tech Stack
 
@@ -17,7 +19,10 @@ This is the backend API for a user authentication system with admin approval wor
 - Express.js
 - PostgreSQL (via Neon DB)
 - Express-session for authentication
+- JWT for API token authentication
 - Bcrypt for password hashing
+- Nodemailer for email delivery
+- Dotenv for environment management
 
 ## Project Structure
 

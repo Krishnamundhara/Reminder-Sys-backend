@@ -19,29 +19,36 @@ initializeDatabase()
   .catch(err => console.error('Database initialization error:', err));
 
 // Set up middleware
+// Set up CORS before other middleware
 app.use(cors({
   origin: function (origin, callback) {
+    // In development, log the origin to help with debugging
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Request origin:', origin);
+    }
+    
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Allow all localhost origins regardless of port in development
+    // In development, always allow localhost regardless of port
     if (process.env.NODE_ENV !== 'production' && origin.match(/^https?:\/\/localhost:[0-9]+$/)) {
       return callback(null, true);
     }
     
-    // Check against allowed origin from environment variable
+    // In production, check against explicit allowed origins
     const allowedOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',') 
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
       : ['http://localhost:3000'];
       
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
     
-    console.log(`CORS blocked: ${origin} is not allowed`);
+    console.log(`CORS blocked: ${origin} is not allowed. Allowed origins:`, allowedOrigins);
     callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -49,12 +56,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Set up session middleware with more persistent configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: true, // Changed to true to ensure session is saved on each request
-  saveUninitialized: false, // Changed to false to prevent saving empty sessions
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production', // true in production, false in development
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // Increased to 7 days for better persistence
+    secure: false, // Set to false in both dev and prod since we might not have HTTPS
+    sameSite: 'lax', // Use lax to allow cross-site requests
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined // Only set domain in production
   }
 }));
 

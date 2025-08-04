@@ -54,6 +54,30 @@ class User {
     }
   }
 
+  static async updateRole(userId, newRole) {
+    try {
+      // Validate role
+      const validRoles = ['user', 'admin'];
+      if (!validRoles.includes(newRole)) {
+        throw new Error('Invalid role specified');
+      }
+      
+      const result = await db.query(
+        'UPDATE users SET role = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, username, email, full_name, phone_number, role, is_approved, is_active, created_at, updated_at',
+        [newRole, userId]
+      );
+      
+      if (result.rows.length === 0) {
+        throw new Error('User not found');
+      }
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw error;
+    }
+  }
+
   static async findByPhoneNumber(phoneNumber) {
     try {
       const result = await db.query(

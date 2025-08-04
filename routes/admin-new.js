@@ -6,7 +6,10 @@ const {
   approveUser, 
   rejectUser, 
   deactivateUser, 
-  reactivateUser 
+  reactivateUser,
+  updateUserRole,
+  deleteUser,
+  getUserDetails
 } = require('../controllers/adminController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 
@@ -27,5 +30,14 @@ router.post('/deactivate-user/:id', verifyToken, isAdmin, deactivateUser);
 
 // Reactivate a user
 router.post('/reactivate-user/:id', verifyToken, isAdmin, reactivateUser);
+
+// Update user role
+router.put('/update-role/:id', verifyToken, isAdmin, updateUserRole);
+
+// Delete user
+router.delete('/users/:id', verifyToken, isAdmin, deleteUser);
+
+// Get detailed user information
+router.get('/users/:id/details', verifyToken, isAdmin, getUserDetails);
 
 module.exports = router;
