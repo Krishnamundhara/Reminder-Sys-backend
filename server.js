@@ -21,33 +21,10 @@ initializeDatabase()
 // Set up middleware
 // Set up CORS before other middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    // In development, log the origin to help with debugging
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Request origin:', origin);
-    }
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // In development, always allow localhost regardless of port
-    if (process.env.NODE_ENV !== 'production' && origin.match(/^https?:\/\/localhost:[0-9]+$/)) {
-      return callback(null, true);
-    }
-    
-    // In production, check against explicit allowed origins
-    const allowedOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-      : ['http://localhost:3000'];
-      
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    }
-    
-    console.log(`CORS blocked: ${origin} is not allowed. Allowed origins:`, allowedOrigins);
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: 'https://remindersys.netlify.app',
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   optionsSuccessStatus: 200
 }));
 app.use(bodyParser.json());
@@ -58,12 +35,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true in production
-    sameSite: 'none',  // required for cross-site cookies
+    secure: true, // Required for cross-site cookies
+    sameSite: 'none',  // Required for cross-site cookies
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    httpOnly: true,
-    domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+    httpOnly: true
   },
   rolling: true,
   cookie: { 
