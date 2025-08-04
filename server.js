@@ -26,7 +26,8 @@ app.use(cors({
   origin: 'https://remindersys.netlify.app',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control'],
+  exposedHeaders: ['Set-Cookie'],
   optionsSuccessStatus: 200
 }));
 app.use(bodyParser.json());
