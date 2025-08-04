@@ -26,8 +26,8 @@ app.use(cors({
   origin: 'https://remindersys.netlify.app',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control'],
-  exposedHeaders: ['Set-Cookie'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma'],
+  exposedHeaders: ['Set-Cookie', 'Date', 'Content-Length'],
   optionsSuccessStatus: 200
 }));
 app.use(bodyParser.json());
@@ -37,14 +37,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const pgSession = connectPgSimple(session);
 
 // Set up session middleware with PostgreSQL store
+app.set('trust proxy', 1); // trust first proxy
+
 app.use(session({
   store: new pgSession({
     conObject: {
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false }
     },
-    createTableIfMissing: true
+    createTableIfMissing: true,
+    tableName: 'session'
   }),
+  name: 'sessionId',
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
@@ -53,7 +57,8 @@ app.use(session({
     secure: true,
     sameSite: 'none',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: '.onrender.com'
   }
 }));
 
