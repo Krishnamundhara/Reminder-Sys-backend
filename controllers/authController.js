@@ -387,14 +387,22 @@ const login = async (req, res) => {
       });
     }
     
-    // Set user in session
-    req.session.user = {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      full_name: user.full_name,
-      role: user.role,
-      is_approved: user.is_approved
+    // Clear any existing session
+    if (req.session) {
+      await new Promise((resolve) => req.session.destroy(resolve));
+    }
+
+    // Create a new session
+    req.session = {
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        is_approved: user.is_approved
+      },
+      created: new Date().toISOString()
     };
     
     // Return user data without password
@@ -457,19 +465,40 @@ const getPendingStatus = async (req, res) => {
 };
 
 // Logout user
-const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: 'Error logging out. Please try again.'
+const logout = async (req, res) => {
+  try {
+    if (req.session) {
+      // Get user ID before destroying session
+      const userId = req.session.user?.id;
+
+      // Destroy current session
+      await new Promise((resolve, reject) => {
+        req.session.destroy((err) => {
+          if (err) reject(err);
+          resolve();
+        });
+      });
+
+      // Clear the session cookie
+      res.clearCookie('sessionId');
+
+      res.status(200).json({
+        success: true,
+        message: 'Logged out successfully'
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: 'Already logged out'
       });
     }
-    res.status(200).json({
-      success: true,
-      message: 'Logged out successfully'
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error logging out. Please try again.'
     });
-  });
+  }
 };
 
 module.exports = {
