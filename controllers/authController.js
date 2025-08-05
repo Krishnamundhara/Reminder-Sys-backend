@@ -481,5 +481,6 @@ module.exports = {
   checkEmailExists,
   checkPhoneExists,
   sendOtp,
-  verifyEmailOtp
+  verifyEmailOtp,
+  restoreSession
 };
